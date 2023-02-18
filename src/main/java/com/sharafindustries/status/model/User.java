@@ -3,10 +3,12 @@ package com.sharafindustries.status.model;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.hibernate.annotations.Table;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
+//import javax.persistence.Entity;
+
+import jakarta.persistence.ElementCollection;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.OneToOne;
@@ -14,12 +16,13 @@ import jakarta.persistence.OneToOne;
 @Component
 @Scope("prototype")
 @Entity
-@Table(appliesTo = "status_users")
+//@Table(name = "status_users")
 public class User
 {
 	@Id
 	private String email;
 	
+	@ElementCollection
 	private List<String> permittedUsers;
 	
 	@OneToOne
