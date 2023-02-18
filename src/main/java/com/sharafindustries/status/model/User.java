@@ -3,20 +3,22 @@ package com.sharafindustries.status.model;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.springframework.context.annotation.Scope;
-import org.springframework.stereotype.Component;
-
 //import javax.persistence.Entity;
 
-import jakarta.persistence.ElementCollection;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.OneToOne;
+import javax.persistence.ElementCollection;
+import javax.persistence.Entity;
+import javax.persistence.Id;
+import javax.persistence.OneToMany;
+import javax.persistence.OneToOne;
+import javax.persistence.Table;
+
+import org.springframework.context.annotation.Scope;
+import org.springframework.stereotype.Component;
 
 @Component
 @Scope("prototype")
 @Entity
-//@Table(name = "status_users")
+@Table(name = "status_users")
 public class User
 {
 	@Id
@@ -25,23 +27,25 @@ public class User
 	@ElementCollection
 	private List<String> permittedUsers;
 	
-	@OneToOne
+	//@ElementCollection(targetClass = Status.class)
+	@OneToMany
 	private List<Status> statuses;
 	
+	@OneToOne
 	private Status currentStatus;
 	
 	public User()
 	{
-		permittedUsers = new ArrayList<>();
-		statuses = new ArrayList<>();
+		permittedUsers = new ArrayList<String>();
+		statuses = new ArrayList<Status>();
 		this.currentStatus = null; 
 	}
 	
 	public User(String email)
 	{
 		this.email = email;
-		permittedUsers = new ArrayList<>();
-		statuses = new ArrayList<>();
+		permittedUsers = new ArrayList<String>();
+		statuses = new ArrayList<Status>();
 		this.currentStatus = null;
 	}
 

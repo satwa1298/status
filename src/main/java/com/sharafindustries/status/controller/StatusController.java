@@ -13,7 +13,7 @@ import org.springframework.web.server.ResponseStatusException;
 import com.sharafindustries.status.model.Status;
 import com.sharafindustries.status.service.UserService;
 
-import jakarta.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpServletResponse;
 
 @RestController
 public class StatusController

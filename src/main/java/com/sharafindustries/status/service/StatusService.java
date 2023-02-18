@@ -17,7 +17,7 @@ public class StatusService
 	
 	public List<Status> getDefaultStatuses()
 	{
-		List<Status> defaultStatuses = new ArrayList<>();
+		List<Status> defaultStatuses = new ArrayList<Status>();
 		defaultStatuses.add(DEFAULT_AVAILABLE_STATUS);
 		defaultStatuses.add(DEFAULT_AWAY_STATUS);
 		defaultStatuses.add(DEFAULT_BUSY_STATUS);
