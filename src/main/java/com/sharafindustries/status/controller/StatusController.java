@@ -59,5 +59,19 @@ public class StatusController
 		userService.setCurrentStatus(callerEmail, statusId);
 		return "might have worked, might have not";
 	}
+	
+	@PostMapping("/create-user")
+	public String createUser(@RequestParam(value = "apiKey") String apiKey, @RequestParam(value = "email") String userEmail)
+	{
+		if (apiKey.equals("genericApiKey"))
+		{
+			userService.createAndSaveNewUser(userEmail);
+			return "success";
+		}
+		else
+		{
+			throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "no");
+		}
+	}
 
 }
