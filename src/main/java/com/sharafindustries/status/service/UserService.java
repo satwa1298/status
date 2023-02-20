@@ -25,7 +25,9 @@ public class UserService
 	{
 		User newUser = context.getBean(User.class, email);
 		newUser.setStatuses(statusService.getDefaultStatuses());
+		newUser.getStatuses().forEach(status -> statusService.saveStatus(status));
 		newUser.setCurrentStatus(StatusService.DEFAULT_AVAILABLE_STATUS);
+		statusService.saveStatus(newUser.getCurrentStatus());
 		return userRepository.save(newUser);
 	}
 	
@@ -46,14 +48,14 @@ public class UserService
 	public void addCustomStatus(String userEmail, String availability, String message)
 	{
 		User user = userRepository.findByEmail(userEmail);
-		user.getStatuses().add(statusService.createCustomStatus(availability, message));
+		user.getStatuses().add(statusService.createAndSaveCustomStatus(availability, message));
 		userRepository.save(user);
 	}
 	
 	public boolean checkIfUserIsPermitted(String callerEmail, String email)
 	{
 		User userStatusInQuestion = userRepository.findByEmail(email);
-		return userStatusInQuestion.getPermittedUsers().contains(callerEmail);
+		return userStatusInQuestion.getPermittedUsers().contains(callerEmail) || callerEmail.equals(email);
 	}
 	
 	public Status getCurrentStatus(String userEmail)
@@ -66,7 +68,7 @@ public class UserService
 		return userRepository.findByEmail(userEmail).getStatuses();
 	}
 	
-	public void setCurrentStatus(String userEmail, int statusId)
+	public boolean setCurrentStatus(String userEmail, int statusId)
 	{
 		User user = userRepository.findByEmail(userEmail);
 		List<Status> statuses = user.getStatuses();
@@ -75,11 +77,27 @@ public class UserService
 		{
 			user.setCurrentStatus(desiredStatusOptional.get());
 			userRepository.save(user);
+			return true;
 		}
 		else
 		{
-			//TODO throw exception here or something
+			return false;
 		}
+	}
+	
+	public void addStatusAndUpdateUser(User user, Status status)
+	{
+		user.getStatuses().add(status);
+		userRepository.save(user);
+	}
+	
+	public void createAndSetStatus(String callerEmail, String availability, String message)
+	{
+		Status status = statusService.createAndSaveCustomStatus(availability, message);
+		User user = userRepository.findByEmail(callerEmail);
+		addStatusAndUpdateUser(user, status);
+		user.setCurrentStatus(status);
+		userRepository.save(user);
 	}
 
 }

@@ -2,6 +2,8 @@ package com.sharafindustries.status.controller;
 
 import java.util.List;
 
+import javax.servlet.http.HttpServletResponse;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -12,8 +14,6 @@ import org.springframework.web.server.ResponseStatusException;
 
 import com.sharafindustries.status.model.Status;
 import com.sharafindustries.status.service.UserService;
-
-import javax.servlet.http.HttpServletResponse;
 
 @RestController
 public class StatusController
@@ -54,10 +54,23 @@ public class StatusController
 	}
 	
 	@PostMapping("/set-current-status")
-	public String setCurrentStatus(@RequestParam(value = "caller") String callerEmail, @RequestParam(value = "statusId") int statusId)
+	public String setCurrentStatus(@RequestParam(value = "caller") String callerEmail,
+			@RequestParam(value = "statusId", required = false) Integer statusId,
+			@RequestParam(value = "availability", required = false) String availability,
+			@RequestParam(value = "message", required = false) String message)
 	{
-		userService.setCurrentStatus(callerEmail, statusId);
-		return "might have worked, might have not";
+		if (statusId == null && (availability == null || message == null))
+		{
+			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "must include status id or availability and message in request");
+		}
+		if (statusId != null)
+		{
+			if (!userService.setCurrentStatus(callerEmail, statusId))
+				userService.createAndSetStatus(callerEmail, availability, message);
+		}
+			
+			
+		return "status set";
 	}
 	
 	@PostMapping("/create-user")
