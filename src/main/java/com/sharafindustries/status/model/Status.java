@@ -1,8 +1,8 @@
 package com.sharafindustries.status.model;
 
 import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.Id;
 
 import org.springframework.context.annotation.Scope;
@@ -14,9 +14,11 @@ import org.springframework.stereotype.Component;
 public class Status
 {
 	@Id
-	@GeneratedValue(strategy = GenerationType.SEQUENCE)
-	private int id;
-	private String availability;
+	private String name;
+	
+	@Enumerated(EnumType.STRING)
+	private Availability availability;
+	
 	private String message;
 
 	public Status()
@@ -24,28 +26,29 @@ public class Status
 		
 	}
 	
-	public Status(String availability, String message)
+	public Status(String name, Availability availability, String message)
 	{
+		this.name = name;
 		this.availability = availability;
 		this.message = message;
 	}
 	
-	public int getId()
+	public String getName()
 	{
-		return id;
+		return name;
 	}
 
-	public void setId(int id)
+	public void setName(String name)
 	{
-		this.id = id;
+		this.name = name;;
 	}
 
-	public String getAvailability()
+	public Availability getAvailability()
 	{
 		return availability;
 	}
 
-	public void setAvailability(String availability)
+	public void setAvailability(Availability availability)
 	{
 		this.availability = availability;
 	}
@@ -63,7 +66,7 @@ public class Status
 	@Override
 	public String toString()
 	{
-		return "Status [id=" + id + ", availability=" + availability + ", message=" + message + "]";
+		return "Status [name=" + name + ", availability=" + availability + ", message=" + message + "]";
 	}
 	
 }

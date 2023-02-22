@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Service;
 
+import com.sharafindustries.status.exception.InvalidAvailabilityException;
 import com.sharafindustries.status.model.Status;
 import com.sharafindustries.status.model.User;
 import com.sharafindustries.status.repository.UserRepository;
@@ -24,10 +25,6 @@ public class UserService
 	public User createAndSaveNewUser(String email)
 	{
 		User newUser = context.getBean(User.class, email);
-		newUser.setStatuses(statusService.getDefaultStatuses());
-		newUser.getStatuses().forEach(status -> statusService.saveStatus(status));
-		newUser.setCurrentStatus(StatusService.DEFAULT_AVAILABLE_STATUS);
-		statusService.saveStatus(newUser.getCurrentStatus());
 		return userRepository.save(newUser);
 	}
 	
@@ -45,10 +42,10 @@ public class UserService
 		userRepository.save(user);
 	}
 	
-	public void addCustomStatus(String userEmail, String availability, String message)
+	public void addCustomStatus(String userEmail, String name, String availability, String message) throws InvalidAvailabilityException
 	{
 		User user = userRepository.findByEmail(userEmail);
-		user.getStatuses().add(statusService.createAndSaveCustomStatus(availability, message));
+		user.getStatuses().add(statusService.createAndSaveCustomStatus(name, availability, message));
 		userRepository.save(user);
 	}
 	
@@ -68,11 +65,11 @@ public class UserService
 		return userRepository.findByEmail(userEmail).getStatuses();
 	}
 	
-	public boolean setCurrentStatus(String userEmail, int statusId)
+	public boolean setCurrentStatus(String userEmail, String statusName)
 	{
 		User user = userRepository.findByEmail(userEmail);
 		List<Status> statuses = user.getStatuses();
-		Optional<Status> desiredStatusOptional = statuses.stream().filter(status -> status.getId() == statusId).findAny();
+		Optional<Status> desiredStatusOptional = statuses.stream().filter(status -> status.getName().equals(statusName)).findAny();
 		if (desiredStatusOptional.isPresent())
 		{
 			user.setCurrentStatus(desiredStatusOptional.get());
@@ -91,10 +88,12 @@ public class UserService
 		userRepository.save(user);
 	}
 	
-	public void createAndSetStatus(String callerEmail, String availability, String message)
+	public void createAndSetStatus(String callerEmail, String name, String availability, String message) throws InvalidAvailabilityException
 	{
-		Status status = statusService.createAndSaveCustomStatus(availability, message);
 		User user = userRepository.findByEmail(callerEmail);
+		//TODO fix this, reconcile with addCustomStatus() above
+		Status status = statusService.createAndSaveCustomStatus(name, availability, message);
+		//TODO this is messy. status is added to statuses list and user is saved then user is saved again
 		addStatusAndUpdateUser(user, status);
 		user.setCurrentStatus(status);
 		userRepository.save(user);

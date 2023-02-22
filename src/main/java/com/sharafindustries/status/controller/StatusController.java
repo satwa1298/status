@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
+import com.sharafindustries.status.exception.InvalidAvailabilityException;
 import com.sharafindustries.status.model.Status;
 import com.sharafindustries.status.service.UserService;
 
@@ -31,10 +32,20 @@ public class StatusController
 			throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You are not authorized to view this person's status");
 	}
 	
-	@PostMapping("/add-custom-status")
-	public String addCustomStatus(@RequestParam(value = "caller") String callerEmail, @RequestParam(value = "availability") String availability, @RequestParam(value = "message") String message)
+	@PostMapping("/add-status")
+	public String addCustomStatus(@RequestParam(value = "caller") String callerEmail, 
+			@RequestParam(value = "name") String name, 
+			@RequestParam(value = "availability") String availability, 
+			@RequestParam(value = "message") String message)
 	{
-		userService.addCustomStatus(callerEmail, availability, message);
+		try
+		{
+			userService.addCustomStatus(callerEmail, name, availability, message);
+		}
+		catch (InvalidAvailabilityException e)
+		{
+			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
+		}
 		return "status added";
 	}
 	
@@ -53,20 +64,27 @@ public class StatusController
 		return userService.getAllStatuses(callerEmail);
 	}
 	
-	@PostMapping("/set-current-status")
+	@PostMapping("/set-status")
 	public String setCurrentStatus(@RequestParam(value = "caller") String callerEmail,
-			@RequestParam(value = "statusId", required = false) Integer statusId,
+			@RequestParam(value = "name", required = false) String name,
 			@RequestParam(value = "availability", required = false) String availability,
 			@RequestParam(value = "message", required = false) String message)
 	{
-		if (statusId == null && (availability == null || message == null))
+		if (name == null && (availability == null || message == null))
 		{
-			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "must include status id or availability and message in request");
+			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "must include status name or availability and message in request");
 		}
-		if (statusId != null)
+		if (name != null)
 		{
-			if (!userService.setCurrentStatus(callerEmail, statusId))
-				userService.createAndSetStatus(callerEmail, availability, message);
+			if (!userService.setCurrentStatus(callerEmail, name))
+				try
+				{
+					userService.createAndSetStatus(callerEmail, name, availability, message);
+				}
+				catch (InvalidAvailabilityException e)
+				{
+					throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
+				}
 		}
 			
 			
