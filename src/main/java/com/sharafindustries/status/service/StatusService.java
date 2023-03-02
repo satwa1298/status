@@ -11,49 +11,55 @@ import com.sharafindustries.status.model.Availability;
 import com.sharafindustries.status.model.Status;
 import com.sharafindustries.status.repository.StatusRepository;
 
-
 @Service
 public class StatusService
 {
 	@Autowired
 	private StatusRepository statusRepository;
-	//TODO these need to be saved. maybe have these 3 accessible to everyone and field in user is only custom statuses?
-	//TODO also maybe add name field
-	public static final Status DEFAULT_AVAILABLE_STATUS = new Status("Available", Availability.Free, "I'm available right now!");
-	public static final Status DEFAULT_AWAY_STATUS = new Status("Away", Availability.Away, "I'm away from my phone a while.");
-	public static final Status DEFAULT_BUSY_STATUS = new Status("Busy", Availability.Busy, "Sorry, I can't talk right now.");
-	private static boolean areDefaultsSaved = false;
-	
-	public List<Status> getDefaultStatuses()
+	// TODO these need to be saved. maybe have these 3 accessible to everyone and
+	// field in user is only custom statuses?
+	// TODO also maybe add name field
+	public static final String DEFAULT_AVAILABLE_MESSAGE = "I'm available right now!";
+	public static final String DEFAULT_AWAY_MESSAGE = "I'm away from my phone a while.";
+	public static final String DEFAULT_BUSY_MESSAGE = "Sorry, I can't talk right now.";
+
+	public List<Status> getDefaultStatuses(String email)
 	{
-		if (!areDefaultsSaved)
-		{
-			statusRepository.save(DEFAULT_AVAILABLE_STATUS);
-			statusRepository.save(DEFAULT_AWAY_STATUS);
-			statusRepository.save(DEFAULT_BUSY_STATUS);
-			areDefaultsSaved = true;
-		}
+		Status defaultAvailableStatus = new Status(prependEmail(email, "Available"), Availability.Free, DEFAULT_AVAILABLE_MESSAGE);
+		Status defaultAwayStatus = new Status(prependEmail(email, "Away"), Availability.Away, DEFAULT_AWAY_MESSAGE);
+		Status defaultBusyStatus = new Status(prependEmail(email, "Busy"), Availability.Busy, DEFAULT_BUSY_MESSAGE);
+		statusRepository.save(defaultAvailableStatus);
+		statusRepository.save(defaultAwayStatus);
+		statusRepository.save(defaultBusyStatus);
 		List<Status> defaultStatuses = new ArrayList<Status>();
-		defaultStatuses.add(DEFAULT_AVAILABLE_STATUS);
-		defaultStatuses.add(DEFAULT_AWAY_STATUS);
-		defaultStatuses.add(DEFAULT_BUSY_STATUS);
+		defaultStatuses.add(defaultAvailableStatus);
+		defaultStatuses.add(defaultAwayStatus);
+		defaultStatuses.add(defaultBusyStatus);
 		return defaultStatuses;
 	}
-	
-	public Status createAndSaveCustomStatus(String name, String availability, String message) throws InvalidAvailabilityException
+
+	public Status createAndSaveCustomStatus(String email, String name, String availability, String message)
+			throws InvalidAvailabilityException
 	{
-		//TODO change this to use context.getBean()
+		// TODO change this to use context.getBean()
 		if (Availability.isValid(availability))
-			return statusRepository.save(new Status(name, Availability.valueOf(availability), message));
+			return new Status(prependEmail(email, name), Availability.valueOf(availability), message);
+		// return statusRepository.save(new Status(name,
+		// Availability.valueOf(availability), message));
 		else
 		{
 			throw new InvalidAvailabilityException(availability + " is not a valid Availability");
 		}
 	}
-	
+
 	public void saveStatus(Status status)
 	{
 		statusRepository.save(status);
 	}
-
+	
+	public String prependEmail(String email, String statusName)
+	{
+		return email + "_" + statusName;
+	}
+	
 }

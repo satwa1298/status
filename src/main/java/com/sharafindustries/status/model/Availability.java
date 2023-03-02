@@ -2,6 +2,7 @@ package com.sharafindustries.status.model;
 
 public enum Availability
 {
+	//TODO change free to available -__-
 	Free, Away, Busy;
 	
 	public static boolean isValid(String availabilityString)

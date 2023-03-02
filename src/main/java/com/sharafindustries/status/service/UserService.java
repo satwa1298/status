@@ -45,7 +45,7 @@ public class UserService
 	public void addCustomStatus(String userEmail, String name, String availability, String message) throws InvalidAvailabilityException
 	{
 		User user = userRepository.findByEmail(userEmail);
-		user.getStatuses().add(statusService.createAndSaveCustomStatus(name, availability, message));
+		user.getStatuses().add(statusService.createAndSaveCustomStatus(userEmail, name, availability, message));
 		userRepository.save(user);
 	}
 	
@@ -67,9 +67,10 @@ public class UserService
 	
 	public boolean setCurrentStatus(String userEmail, String statusName)
 	{
+		String adjustedStatusName = statusService.prependEmail(userEmail, statusName);
 		User user = userRepository.findByEmail(userEmail);
 		List<Status> statuses = user.getStatuses();
-		Optional<Status> desiredStatusOptional = statuses.stream().filter(status -> status.getName().equals(statusName)).findAny();
+		Optional<Status> desiredStatusOptional = statuses.stream().filter(status -> status.getName().equals(adjustedStatusName)).findAny();
 		if (desiredStatusOptional.isPresent())
 		{
 			user.setCurrentStatus(desiredStatusOptional.get());
@@ -92,7 +93,7 @@ public class UserService
 	{
 		User user = userRepository.findByEmail(callerEmail);
 		//TODO fix this, reconcile with addCustomStatus() above
-		Status status = statusService.createAndSaveCustomStatus(name, availability, message);
+		Status status = statusService.createAndSaveCustomStatus(callerEmail, name, availability, message);
 		//TODO this is messy. status is added to statuses list and user is saved then user is saved again
 		addStatusAndUpdateUser(user, status);
 		user.setCurrentStatus(status);

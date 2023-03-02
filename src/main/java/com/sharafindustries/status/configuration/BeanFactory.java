@@ -19,7 +19,7 @@ public class BeanFactory
 	public User createUser(String email)
 	{
 		User user = new User(email);
-		user.setStatuses(statusService.getDefaultStatuses());
+		user.setStatuses(statusService.getDefaultStatuses(email));
 		user.setCurrentStatus(user.getStatuses().get(0));
 		return user;
 	}
