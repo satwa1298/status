@@ -62,4 +62,12 @@ public class StatusService
 		return email + "_" + statusName;
 	}
 	
+	//TODO do i even need this
+	public Status removeEmailPrefix(Status status)
+	{
+		
+		status.setName(status.getName().split("_")[1]);
+		return status;
+	}
+	
 }
