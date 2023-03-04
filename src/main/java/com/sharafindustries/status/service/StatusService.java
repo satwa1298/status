@@ -43,7 +43,7 @@ public class StatusService
 	{
 		// TODO change this to use context.getBean()
 		if (Availability.isValid(availability))
-			return new Status(prependEmail(email, name), Availability.valueOf(availability), message);
+			return statusRepository.save(new Status(prependEmail(email, name), Availability.valueOf(availability), message));
 		// return statusRepository.save(new Status(name,
 		// Availability.valueOf(availability), message));
 		else
