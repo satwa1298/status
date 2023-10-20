@@ -128,23 +128,6 @@ public class UserService
 		return true;
 	}
 	
-//	public void addStatusAndUpdateUser(User user, Status status)
-//	{
-//		user.getStatuses().add(status);
-//		userRepository.save(user);
-//	}
-//	
-//	public void createAndSetStatus(String callerEmail, String name, String availability, String message) throws InvalidAvailabilityException
-//	{
-//		User user = userRepository.findByEmail(callerEmail);
-//		//TODO fix this, reconcile with addCustomStatus() above
-//		Status status = statusService.createCustomStatus(callerEmail, name, availability, message);
-//		//TODO this is messy. status is added to statuses list and user is saved then user is saved again
-//		addStatusAndUpdateUser(user, status);
-//		user.setCurrentStatus(status);
-//		userRepository.save(user);
-//	}
-	
 	public UserStatusInfo getUserStatusInfo(User user)
 	{
 		return new UserStatusInfo(user.getCurrentAvailability().toString(), user.getCurrentMessage());
