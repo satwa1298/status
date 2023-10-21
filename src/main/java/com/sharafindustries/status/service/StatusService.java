@@ -1,5 +1,7 @@
 package com.sharafindustries.status.service;
 
+import java.util.Objects;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -19,6 +21,9 @@ public class StatusService
 
 	public Status createCustomStatus(User user, String name, String availability, String message) throws InvalidAvailabilityException
 	{
+		boolean isNameAlreadyUsed = Objects.nonNull(statusRepository.getStatusByNameAndUser(name, user));
+		if (isNameAlreadyUsed)
+			throw new ResponseStatusException(HttpStatus.CONFLICT, "name is already in use");
 		if (Availability.isValid(availability))
 			return new Status(user, name, Availability.valueOf(availability), message);
 		else
