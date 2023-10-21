@@ -61,8 +61,12 @@ public class UserService
 	
 	public void addFriend(User user, String friendEmailToAdd)
 	{
-		user.getFriendList().add(friendEmailToAdd);
-		userRepository.save(user);
+		List<String> friendList = user.getFriendList();;
+		if (!friendList.contains(friendEmailToAdd))
+		{
+			friendList.add(friendEmailToAdd);
+			userRepository.save(user);
+		}
 	}
 	
 	public void deleteFriend(User user, String friendEmailToRemove)
