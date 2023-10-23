@@ -41,8 +41,13 @@ public class UserService
 	
 	public User authenticateUser(String authorizationHeader)
 	{
+		System.out.println("in user service");
+		System.out.println(authorizationHeader);
 		if (authorizationHeader == null || !authorizationHeader.startsWith("Basic"))
+		{
+			System.out.println("REASON 1");
 			throw new ResponseStatusException(HttpStatus.UNAUTHORIZED);
+		}
 		String base64Credentials = authorizationHeader.substring("Basic ".length());
 		String decodedCredentials = new String(Base64.getDecoder().decode(base64Credentials));
 		String[] values = decodedCredentials.split(":");
@@ -52,6 +57,7 @@ public class UserService
 		User user = userRepository.findByEmail(email);
 		if (user == null || !user.getPassword().equals(password))
 		{
+			System.out.println("REASON 2");
 			throw new ResponseStatusException(HttpStatus.UNAUTHORIZED);
 		}
 		return user;

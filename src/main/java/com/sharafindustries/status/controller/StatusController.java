@@ -5,6 +5,7 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestHeader;
@@ -17,11 +18,20 @@ import com.sharafindustries.status.model.User;
 import com.sharafindustries.status.model.UserStatusInfo;
 import com.sharafindustries.status.service.UserService;
 
+@CrossOrigin(origins = "http://localhost:9090")
 @RestController
 public class StatusController
 {
 	@Autowired
 	private UserService userService;
+	
+	@PostMapping("/authenticate-user")
+	public ResponseEntity<String> areCredentialsValid(@RequestHeader("Authorization") String authorizationHeader)
+	{
+		System.out.println("auth request received");
+		userService.authenticateUser(authorizationHeader);
+		return ResponseEntity.ok().build();
+	}
 	
 	@GetMapping("/get-status")
 	public UserStatusInfo getStatus(@RequestHeader("Authorization") String authorizationHeader, @RequestParam(value = "email") String friendEmail)
