@@ -122,4 +122,9 @@ public class UserService
 		return new UserStatusInfo(user.getCurrentAvailability().toString(), user.getCurrentMessage());
 	}
 	
+	public void deleteCustomStatus(User user, String statusName)
+	{
+		statusService.deleteCustomStatus(user, statusName);
+	}
+	
 }

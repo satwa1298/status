@@ -61,4 +61,14 @@ public class StatusService
 	{
 		statusRepository.save(status);
 	}
+	
+	public void deleteCustomStatus(User user, String name)
+	{
+		if (Availability.isValid(name))
+			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Cannot delete status " + name);
+		Status status = statusRepository.getStatusByNameAndUser(name, user);
+		if (status == null)
+			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Status with name " + name + " does not exist");
+		statusRepository.delete(status);
+	}
 }

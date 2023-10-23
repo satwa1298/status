@@ -96,5 +96,13 @@ public class StatusController
 		userService.createAndSaveNewUser(userEmail, password);
 		return new ResponseEntity<>(HttpStatus.CREATED);
 	}
+	
+	@PostMapping("/delete-custom-status")
+	public ResponseEntity<User> deleteCustomStatus(@RequestHeader("Authorization") String authorizationHeader, @RequestParam String statusName)
+	{
+		User user = userService.authenticateUser(authorizationHeader);
+		userService.deleteCustomStatus(user, statusName);
+		return ResponseEntity.ok().build();
+	}
 
 }
