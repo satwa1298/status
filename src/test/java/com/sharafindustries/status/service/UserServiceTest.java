@@ -23,7 +23,6 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
 
-import com.sharafindustries.status.exception.InvalidAvailabilityException;
 import com.sharafindustries.status.model.Availability;
 import com.sharafindustries.status.model.Status;
 import com.sharafindustries.status.model.User;
@@ -148,7 +147,7 @@ public class UserServiceTest
 	}
 
 	@Test
-	public void testAddCustomStatus_AddsCustomStatus() throws InvalidAvailabilityException
+	public void testAddCustomStatus_AddsCustomStatus()
 	{
 		User user = new User("email", "password");
 		user.setCustomStatuses(new ArrayList<>());
@@ -159,7 +158,7 @@ public class UserServiceTest
 	}
 
 	@Test
-	public void testAddCustomStatus_ThrowsException_WhenInvalidAvailabilityIsGiven() throws InvalidAvailabilityException
+	public void testAddCustomStatus_ThrowsException_WhenInvalidAvailabilityIsGiven()
 	{
 		User user = new User("email", "password");
 		when(statusService.createCustomStatus(user, "statusName", "invalidAvailability", "message"))
