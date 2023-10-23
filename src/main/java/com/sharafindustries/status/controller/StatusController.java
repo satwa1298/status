@@ -2,20 +2,16 @@ package com.sharafindustries.status.controller;
 
 import java.util.List;
 
-import javax.servlet.http.HttpServletResponse;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestHeader;
-import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
-import com.sharafindustries.status.exception.InvalidAvailabilityException;
 import com.sharafindustries.status.model.Status;
 import com.sharafindustries.status.model.User;
 import com.sharafindustries.status.model.UserStatusInfo;
@@ -52,7 +48,7 @@ public class StatusController
 	}
 	
 	@PostMapping("/add-friend")
-	public ResponseEntity<User> addFriend(@RequestHeader("Authorization") String authorizationHeader, @RequestParam(value = "emailToAdd") String friendEmailToAdd)
+	public ResponseEntity<String> addFriend(@RequestHeader("Authorization") String authorizationHeader, @RequestParam(value = "emailToAdd") String friendEmailToAdd)
 	{
 		User user = userService.authenticateUser(authorizationHeader);
 		userService.addFriend(user, friendEmailToAdd);
@@ -60,7 +56,7 @@ public class StatusController
 	}
 	
 	@PostMapping("/delete-friend")
-	public ResponseEntity<User> deleteFriend(@RequestHeader("Authorization") String authorizationHeader, @RequestParam(value = "emailToDelete") String friendEmailToDelete)
+	public ResponseEntity<String> deleteFriend(@RequestHeader("Authorization") String authorizationHeader, @RequestParam(value = "emailToDelete") String friendEmailToDelete)
 	{
 		User user = userService.authenticateUser(authorizationHeader);
 		userService.deleteFriend(user, friendEmailToDelete);
@@ -83,14 +79,14 @@ public class StatusController
 	}
 	
 	@PostMapping("/create-user")
-	public ResponseEntity<User> createUser(@RequestParam(value = "email") String userEmail, @RequestParam String password)
+	public ResponseEntity<String> createUser(@RequestParam(value = "email") String userEmail, @RequestParam String password)
 	{
 		userService.createAndSaveNewUser(userEmail, password);
 		return new ResponseEntity<>(HttpStatus.CREATED);
 	}
 	
 	@PostMapping("/delete-custom-status")
-	public ResponseEntity<User> deleteCustomStatus(@RequestHeader("Authorization") String authorizationHeader, @RequestParam String statusName)
+	public ResponseEntity<String> deleteCustomStatus(@RequestHeader("Authorization") String authorizationHeader, @RequestParam String statusName)
 	{
 		User user = userService.authenticateUser(authorizationHeader);
 		userService.deleteCustomStatus(user, statusName);
