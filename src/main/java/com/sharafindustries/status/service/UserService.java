@@ -75,7 +75,7 @@ public class UserService
 		userRepository.save(user);
 	}
 	
-	public void addCustomStatus(User user, String statusName, String availability, String message) throws InvalidAvailabilityException
+	public void addCustomStatus(User user, String statusName, String availability, String message)
 	{
 		user.getCustomStatuses().add(statusService.createCustomStatus(user, statusName, availability, message));
 		userRepository.save(user);

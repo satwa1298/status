@@ -20,6 +20,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.context.ApplicationContext;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
 
 import com.sharafindustries.status.exception.InvalidAvailabilityException;
@@ -162,8 +163,8 @@ public class UserServiceTest
 	{
 		User user = new User("email", "password");
 		when(statusService.createCustomStatus(user, "statusName", "invalidAvailability", "message"))
-				.thenThrow(new InvalidAvailabilityException("Invalid Availability"));
-		assertThrows(InvalidAvailabilityException.class, () ->
+				.thenThrow(new ResponseStatusException(HttpStatus.BAD_REQUEST, "invalidAvailability is not a valid Availability"));
+		assertThrows(ResponseStatusException.class, () ->
 		{
 			userService.addCustomStatus(user, "statusName", "invalidAvailability", "message");
 		});

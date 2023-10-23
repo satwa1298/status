@@ -19,7 +19,7 @@ public class StatusService
 	@Autowired
 	private StatusRepository statusRepository;
 
-	public Status createCustomStatus(User user, String name, String availability, String message) throws InvalidAvailabilityException
+	public Status createCustomStatus(User user, String name, String availability, String message)
 	{
 		if (Availability.isValid(name))
 			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Name cannot be Available, Away, or Busy");
@@ -31,7 +31,7 @@ public class StatusService
 			return new Status(user, name, Availability.valueOf(availability), message);
 		else
 		{
-			throw new InvalidAvailabilityException(availability + " is not a valid Availability");
+			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, availability + " is not a valid Availability");
 		}
 	}
 	

@@ -47,14 +47,7 @@ public class StatusController
 			@RequestParam(value = "message") String message)
 	{
 		User user = userService.authenticateUser(authorizationHeader);
-		try
-		{
-			userService.addCustomStatus(user, statusName, availability, message);
-		}
-		catch (InvalidAvailabilityException e)
-		{
-			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
-		}
+		userService.addCustomStatus(user, statusName, availability, message);
 		return new ResponseEntity<>(HttpStatus.CREATED);
 	}
 	
@@ -66,7 +59,6 @@ public class StatusController
 		return ResponseEntity.ok().build();
 	}
 	
-	//TODO add mapping for removing permitted user
 	@PostMapping("/delete-friend")
 	public ResponseEntity<User> deleteFriend(@RequestHeader("Authorization") String authorizationHeader, @RequestParam(value = "emailToDelete") String friendEmailToDelete)
 	{
