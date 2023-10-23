@@ -81,7 +81,7 @@ public class UserService
 		userRepository.save(user);
 	}
 	
-	public boolean isFriend(User user, String maybeFriendEmail)
+	public boolean userIsOnOtherFriendList(User user, String maybeFriendEmail)
 	{
 		if (user.getEmail().equals(maybeFriendEmail))
 			return true;
@@ -110,24 +110,9 @@ public class UserService
 	
 	public boolean setCurrentStatus(User user, String statusName)
 	{
-		Status desiredStatus;
-		switch (statusName)
-		{
-			case "AVAILABLE":
-				desiredStatus = Status.DEFAULT_AVAILABLE_STATUS;
-				break;
-			case "AWAY":
-				desiredStatus = Status.DEFAULT_AWAY_STATUS;
-				break;
-			case "BUSY":
-				desiredStatus = Status.DEFAULT_BUSY_STATUS;
-				break;
-			default:
-				desiredStatus = statusService.getStatusForUser(statusName, user);
-				break;
-		}
-		user.setCurrentAvailability(desiredStatus.getAvailability());
-		user.setCurrentMessage(desiredStatus.getMessage());
+		Status status = statusService.getStatusForUser(statusName, user);
+		user.setCurrentAvailability(status.getAvailability());
+		user.setCurrentMessage(status.getMessage());
 		userRepository.save(user);
 		return true;
 	}

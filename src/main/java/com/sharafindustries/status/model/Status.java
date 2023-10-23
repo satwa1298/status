@@ -32,9 +32,9 @@ public class Status
 	
 	private String message;
 	
-	public static final Status DEFAULT_AVAILABLE_STATUS = new Status(null, "Default Available Status", Availability.Available, "I'm available right now!");
-	public static final Status DEFAULT_AWAY_STATUS = new Status(null, "Default Away Status", Availability.Away, "I'm away right now.");
-	public static final Status DEFAULT_BUSY_STATUS = new Status(null, "Default Busy Status", Availability.Busy, "Sorry, I'm busy right now.");
+	public static final Status DEFAULT_AVAILABLE_STATUS = new Status(null, Availability.Available.toString(), Availability.Available, "I'm available right now!");
+	public static final Status DEFAULT_AWAY_STATUS = new Status(null, Availability.Away.toString(), Availability.Away, "I'm away right now.");
+	public static final Status DEFAULT_BUSY_STATUS = new Status(null, Availability.Busy.toString(), Availability.Busy, "Sorry, I'm busy right now.");
 	
 
 	public Status()

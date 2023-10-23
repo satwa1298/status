@@ -32,7 +32,7 @@ public class StatusController
 	{
 		User user = userService.authenticateUser(authorizationHeader);
 		//TODO its currently unclear that whats actually being checked is whether the friend has the caller on their friend list
-		if (userService.isFriend(user, friendEmail))
+		if (userService.userIsOnOtherFriendList(user, friendEmail))
 		{
 			return userService.getUserStatusInfo(userService.getUserByEmail(friendEmail));
 		}
