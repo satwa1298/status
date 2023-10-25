@@ -13,7 +13,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
-import com.sharafindustries.status.model.Status;
 import com.sharafindustries.status.model.User;
 import com.sharafindustries.status.model.UserStatusInfo;
 import com.sharafindustries.status.service.UserService;
@@ -73,11 +72,18 @@ public class StatusController
 		return ResponseEntity.ok().build();
 	}
 	
-	@GetMapping("/my-statuses")
-	public List<Status> getUserCustomStatuses(@RequestHeader("Authorization") String authorizationHeader)
+	@GetMapping("/my-friends")
+	public List<String> getFriendList(@RequestHeader("Authorization") String authorizationHeader)
 	{
 		User user = userService.authenticateUser(authorizationHeader);
-		return userService.getCustomStatuses(user);
+		return user.getFriendList();
+	}
+	
+	@GetMapping("/my-statuses")
+	public List<UserStatusInfo> getUserCustomStatuses(@RequestHeader("Authorization") String authorizationHeader)
+	{
+		User user = userService.authenticateUser(authorizationHeader);
+		return userService.getCustomStatusInfo(user);
 	}
 	
 	@PostMapping("/set-status")

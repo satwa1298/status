@@ -107,9 +107,9 @@ public class UserService
 		return userRepository.findByEmail(userEmail).getCurrentMessage();
 	}
 	
-	public List<Status> getCustomStatuses(User user)
+	public List<UserStatusInfo> getCustomStatusInfo(User user)
 	{
-		return user.getCustomStatuses();
+		return statusService.getCustomStatusInfo(user);
 	}
 	
 	public boolean setCurrentStatus(User user, String statusName)
@@ -123,7 +123,8 @@ public class UserService
 	
 	public UserStatusInfo getUserStatusInfo(User user)
 	{
-		return new UserStatusInfo(user.getCurrentAvailability().toString(), user.getCurrentMessage());
+		
+		return new UserStatusInfo(user.getCurrentStatusName(), user.getCurrentAvailability().toString(), user.getCurrentMessage());
 	}
 	
 	public void deleteCustomStatus(User user, String statusName)

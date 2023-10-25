@@ -29,8 +29,9 @@ public class User
 	@OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
 	private List<Status> customStatuses;
 	
-//	@OneToOne
-//	private Status currentStatus;
+	//TODO probably refactor this to be UserStatusInfo, and make availability field in UserStatusInfo type Availability
+	private String currentStatusName;
+	
 	private Availability currentAvailability;
 	
 	private String currentMessage;
@@ -39,6 +40,7 @@ public class User
 	{
 		friendList = new ArrayList<String>();
 		customStatuses = new ArrayList<Status>();
+		this.currentStatusName = Status.DEFAULT_AVAILABLE_STATUS.getName();
 		this.currentAvailability = Status.DEFAULT_AVAILABLE_STATUS.getAvailability();
 		this.currentMessage = Status.DEFAULT_AVAILABLE_STATUS.getMessage();
 	}
@@ -49,15 +51,17 @@ public class User
 		this.password = password;
 		friendList = new ArrayList<String>();
 		customStatuses = new ArrayList<Status>();
+		this.currentStatusName = Status.DEFAULT_AVAILABLE_STATUS.getName();
 		this.currentAvailability = Status.DEFAULT_AVAILABLE_STATUS.getAvailability();
 		this.currentMessage = Status.DEFAULT_AVAILABLE_STATUS.getMessage();
 	}
 
-	public User(String email, List<String> friendList, List<Status> customStatuses, Availability currentAvailability, String currentMessage)
+	public User(String email, List<String> friendList, List<Status> customStatuses, String currentStatusName, Availability currentAvailability, String currentMessage)
 	{
 		this.email = email;
 		this.friendList = friendList;
 		this.customStatuses = customStatuses;
+		this.currentStatusName = currentStatusName;
 		this.currentAvailability = currentAvailability;
 		this.currentMessage = currentMessage;
 	}
@@ -102,6 +106,16 @@ public class User
 		this.customStatuses = customStatuses;
 	}
 
+	public String getCurrentStatusName()
+	{
+		return currentStatusName;
+	}
+
+	public void setCurrentStatusName(String currentStatusName)
+	{
+		this.currentStatusName = currentStatusName;
+	}
+
 	public Availability getCurrentAvailability()
 	{
 		return currentAvailability;
@@ -129,6 +143,7 @@ public class User
 		int result = 1;
 		result = prime * result + ((currentAvailability == null) ? 0 : currentAvailability.hashCode());
 		result = prime * result + ((currentMessage == null) ? 0 : currentMessage.hashCode());
+		result = prime * result + ((currentStatusName == null) ? 0 : currentStatusName.hashCode());
 		result = prime * result + ((customStatuses == null) ? 0 : customStatuses.hashCode());
 		result = prime * result + ((email == null) ? 0 : email.hashCode());
 		result = prime * result + ((friendList == null) ? 0 : friendList.hashCode());
@@ -154,6 +169,13 @@ public class User
 				return false;
 		}
 		else if (!currentMessage.equals(other.currentMessage))
+			return false;
+		if (currentStatusName == null)
+		{
+			if (other.currentStatusName != null)
+				return false;
+		}
+		else if (!currentStatusName.equals(other.currentStatusName))
 			return false;
 		if (customStatuses == null)
 		{
@@ -189,8 +211,9 @@ public class User
 	@Override
 	public String toString()
 	{
-		return "User [email=" + email + ", friendList=" + friendList + ", statuses=" + customStatuses
-				+ ", currentAvailability=" + currentAvailability + ", currentMessage=" + currentMessage + "]";
+		return "User [email=" + email + ", password=" + password + ", friendList=" + friendList + ", customStatuses="
+				+ customStatuses + ", currentStatusName=" + currentStatusName + ", currentAvailability="
+				+ currentAvailability + ", currentMessage=" + currentMessage + "]";
 	}
 	
 }

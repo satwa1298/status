@@ -1,6 +1,8 @@
 package com.sharafindustries.status.service;
 
+import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -10,6 +12,7 @@ import org.springframework.web.server.ResponseStatusException;
 import com.sharafindustries.status.model.Availability;
 import com.sharafindustries.status.model.Status;
 import com.sharafindustries.status.model.User;
+import com.sharafindustries.status.model.UserStatusInfo;
 import com.sharafindustries.status.repository.StatusRepository;
 
 @Service
@@ -69,5 +72,22 @@ public class StatusService
 		if (status == null)
 			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Status with name " + name + " does not exist");
 		statusRepository.delete(status);
+	}
+	
+//	public Status getStatusForUser(String name, User user)
+//	{
+//		return statusRepository.getStatusByNameAndUser(name, user);
+//	}
+	
+	public List<UserStatusInfo> getCustomStatusInfo(User user)
+	{
+		List<Status> customStatuses = user.getCustomStatuses();
+		List<UserStatusInfo> customStatusInfoList = customStatuses.stream().map(status -> toUserStatusInfo(status)).collect(Collectors.toList());
+		return customStatusInfoList;
+	}
+	
+	private UserStatusInfo toUserStatusInfo(Status status)
+	{
+		return new UserStatusInfo(status.getName(), status.getAvailability().toString(), status.getMessage());
 	}
 }

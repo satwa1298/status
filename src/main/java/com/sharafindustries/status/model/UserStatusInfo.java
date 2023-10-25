@@ -7,6 +7,7 @@ import org.springframework.stereotype.Component;
 @Scope("prototype")
 public class UserStatusInfo
 {
+	private String name;
 	private String availability;
 	private String message;
 	
@@ -15,11 +16,22 @@ public class UserStatusInfo
 		
 	}
 	
-	public UserStatusInfo(String availability, String message)
+	public UserStatusInfo(String name, String availability, String message)
 	{
 		super();
+		this.name = name;
 		this.availability = availability;
 		this.message = message;
+	}
+	
+	public String getName()
+	{
+		return name;
+	}
+
+	public void setName(String name)
+	{
+		this.name = name;
 	}
 
 	public String getAvailability()
@@ -49,6 +61,7 @@ public class UserStatusInfo
 		int result = 1;
 		result = prime * result + ((availability == null) ? 0 : availability.hashCode());
 		result = prime * result + ((message == null) ? 0 : message.hashCode());
+		result = prime * result + ((name == null) ? 0 : name.hashCode());
 		return result;
 	}
 
@@ -76,12 +89,19 @@ public class UserStatusInfo
 		}
 		else if (!message.equals(other.message))
 			return false;
+		if (name == null)
+		{
+			if (other.name != null)
+				return false;
+		}
+		else if (!name.equals(other.name))
+			return false;
 		return true;
 	}
 
 	@Override
 	public String toString()
 	{
-		return "UserStatusInfo [availability=" + availability + ", message=" + message + "]";
+		return "UserStatusInfo [name=" + name + ", availability=" + availability + ", message=" + message + "]";
 	}
 }

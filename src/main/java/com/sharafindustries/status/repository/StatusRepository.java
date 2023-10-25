@@ -9,5 +9,5 @@ public interface StatusRepository extends JpaRepository<Status, Integer>
 {
 	
 	public Status getStatusByNameAndUser(String name, User user);
-
+	
 }
