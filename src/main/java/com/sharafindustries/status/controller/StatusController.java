@@ -27,7 +27,6 @@ public class StatusController
 	@PostMapping("/authenticate-user")
 	public ResponseEntity<String> areCredentialsValid(@RequestHeader("Authorization") String authorizationHeader)
 	{
-		System.out.println("auth request received");
 		userService.authenticateUser(authorizationHeader);
 		return ResponseEntity.ok().build();
 	}
@@ -36,7 +35,6 @@ public class StatusController
 	public UserStatusInfo getStatus(@RequestHeader("Authorization") String authorizationHeader, @RequestParam(value = "email") String friendEmail)
 	{
 		User user = userService.authenticateUser(authorizationHeader);
-		//TODO its currently unclear that whats actually being checked is whether the friend has the caller on their friend list
 		if (userService.canUserViewStatus(user, friendEmail))
 		{
 			return userService.getUserStatusInfo(userService.getUserByEmail(friendEmail));
