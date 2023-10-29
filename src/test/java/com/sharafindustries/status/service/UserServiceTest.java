@@ -170,33 +170,33 @@ public class UserServiceTest
 	}
 
 	@Test
-	public void testUserIsOnOtherFriendList_ReturnsTrue_WhenEmailIsOnFriendList()
+	public void testCanUserViewStatus_ReturnsTrue_WhenEmailIsOnFriendList()
 	{
 		User user = new User("email", "password");
 		User friendUser = new User("friendEmail", "password");
 		friendUser.setFriendList(new ArrayList<>(Arrays.asList("email")));
 		when(userRepository.findByEmail("friendEmail")).thenReturn(friendUser);
-		assertTrue(userService.userIsOnOtherFriendList(user, "friendEmail"));
+		assertTrue(userService.canUserViewStatus(user, "friendEmail"));
 	}
 
 	@Test
-	public void testUserIsOnOtherFriendList_ReturnsFalse_WhenEmailIsNotOnFriendList()
+	public void testCanUserViewStatus_ReturnsFalse_WhenEmailIsNotOnFriendList()
 	{
 		User user = new User("email", "password");
 		User friendUser = new User("friendEmail", "password");
 		friendUser.setFriendList(new ArrayList<>());
 		when(userRepository.findByEmail("friendEmail")).thenReturn(friendUser);
-		assertFalse(userService.userIsOnOtherFriendList(user, "friendEmail"));
+		assertFalse(userService.canUserViewStatus(user, "friendEmail"));
 	}
 
 	@Test
-	public void testUserIsOnOtherFriendList_ThrowsException_WhenFriendEmailIsNotRegistered()
+	public void testCanUserViewStatus_ThrowsException_WhenFriendEmailIsNotRegistered()
 	{
 		User user = new User("email", "password");
 		when(userRepository.findByEmail("nonexistentfriend")).thenReturn(null);
 		assertThrows(ResponseStatusException.class, () ->
 		{
-			userService.userIsOnOtherFriendList(user, "nonexistentfriend");
+			userService.canUserViewStatus(user, "nonexistentfriend");
 		});
 	}
 }
