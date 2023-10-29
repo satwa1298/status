@@ -12,6 +12,9 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 
 import com.sharafindustries.status.model.User;
 import com.sharafindustries.status.model.UserStatusInfo;
@@ -24,6 +27,9 @@ public class StatusController
 	@Autowired
 	private UserService userService;
 	
+	private static final Logger logger = LoggerFactory.getLogger(StatusController.class);
+
+	
 	@PostMapping("/authenticate-user")
 	public ResponseEntity<String> areCredentialsValid(@RequestHeader("Authorization") String authorizationHeader)
 	{
@@ -34,7 +40,9 @@ public class StatusController
 	@GetMapping("/get-status")
 	public UserStatusInfo getStatus(@RequestHeader("Authorization") String authorizationHeader, @RequestParam(value = "email") String friendEmail)
 	{
+		logger.info("received /get-status GET request");
 		User user = userService.authenticateUser(authorizationHeader);
+		logger.info("user: {}", user.getEmail());
 		if (userService.canUserViewStatus(user, friendEmail))
 		{
 			return userService.getUserStatusInfo(userService.getUserByEmail(friendEmail));
@@ -49,7 +57,9 @@ public class StatusController
 			@RequestParam(value = "availability") String availability, 
 			@RequestParam(value = "message") String message)
 	{
+		logger.info("received /create-custom-status POST request");
 		User user = userService.authenticateUser(authorizationHeader);
+		logger.info("user: {}", user.getEmail());
 		userService.addCustomStatus(user, statusName, availability, message);
 		return new ResponseEntity<>(HttpStatus.CREATED);
 	}
@@ -57,7 +67,9 @@ public class StatusController
 	@PostMapping("/add-friend")
 	public ResponseEntity<String> addFriend(@RequestHeader("Authorization") String authorizationHeader, @RequestParam(value = "emailToAdd") String friendEmailToAdd)
 	{
+		logger.info("received /add-friend POST request");
 		User user = userService.authenticateUser(authorizationHeader);
+		logger.info("user: {}", user.getEmail());
 		userService.addFriend(user, friendEmailToAdd);
 		return ResponseEntity.ok().build();
 	}
@@ -65,7 +77,9 @@ public class StatusController
 	@PostMapping("/delete-friend")
 	public ResponseEntity<String> deleteFriend(@RequestHeader("Authorization") String authorizationHeader, @RequestParam(value = "emailToDelete") String friendEmailToDelete)
 	{
+		logger.info("received /delete-friend POST request");
 		User user = userService.authenticateUser(authorizationHeader);
+		logger.info("user: {}", user.getEmail());
 		userService.deleteFriend(user, friendEmailToDelete);
 		return ResponseEntity.ok().build();
 	}
@@ -73,21 +87,27 @@ public class StatusController
 	@GetMapping("/my-friends")
 	public List<String> getFriendList(@RequestHeader("Authorization") String authorizationHeader)
 	{
+		logger.info("received /my-friends GET request");
 		User user = userService.authenticateUser(authorizationHeader);
+		logger.info("user: {}", user.getEmail());
 		return user.getFriendList();
 	}
 	
 	@GetMapping("/my-statuses")
 	public List<UserStatusInfo> getUserCustomStatuses(@RequestHeader("Authorization") String authorizationHeader)
 	{
+		logger.info("received /my-statuses GET request");
 		User user = userService.authenticateUser(authorizationHeader);
+		logger.info("user: {}", user.getEmail());
 		return userService.getCustomStatusInfo(user);
 	}
 	
 	@PostMapping("/set-status")
 	public String setCurrentStatus(@RequestHeader("Authorization") String authorizationHeader, @RequestParam String statusName)
 	{
+		logger.info("received /set-status POST request");
 		User user = userService.authenticateUser(authorizationHeader);
+		logger.info("user: {}", user.getEmail());
 		userService.setCurrentStatus(user, statusName);
 		return "status set";
 	}
@@ -95,6 +115,7 @@ public class StatusController
 	@PostMapping("/create-user")
 	public ResponseEntity<String> createUser(@RequestParam(value = "email") String userEmail, @RequestParam String password)
 	{
+		logger.info("received /create-user POST request for email {}", userEmail);
 		userService.createAndSaveNewUser(userEmail, password);
 		return new ResponseEntity<>(HttpStatus.CREATED);
 	}
@@ -102,7 +123,9 @@ public class StatusController
 	@PostMapping("/delete-custom-status")
 	public ResponseEntity<String> deleteCustomStatus(@RequestHeader("Authorization") String authorizationHeader, @RequestParam String statusName)
 	{
+		logger.info("received /delete-custom-status POST request");
 		User user = userService.authenticateUser(authorizationHeader);
+		logger.info("user: {}", user.getEmail());
 		userService.deleteCustomStatus(user, statusName);
 		return ResponseEntity.ok().build();
 	}

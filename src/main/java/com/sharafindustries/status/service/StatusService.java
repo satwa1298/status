@@ -95,7 +95,7 @@ public class StatusService
 	 * 
 	 * @param user the user to delete the status for
 	 * @param name the name of the status to delete
-	 * @throws ResponseStatusException with HttpStatus.BAD_REQUEST if the status name is Available, Away, or Busy, or if the status doesn't exist
+	 * @throws ResponseStatusException with HttpStatus.BAD_REQUEST if the status name is Available, Away, or Busy, or if the status doesn't exist.
 	 */
 	public void deleteCustomStatus(User user, String name)
 	{
