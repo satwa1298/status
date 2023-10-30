@@ -1,14 +1,21 @@
 package com.sharafindustries.status.service;
 
+import java.io.IOException;
+import java.security.GeneralSecurityException;
 import java.util.Base64;
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
+import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken;
+import com.google.api.client.googleapis.auth.oauth2.GoogleIdTokenVerifier;
+import com.sharafindustries.status.controller.StatusController;
 import com.sharafindustries.status.model.Availability;
 import com.sharafindustries.status.model.Status;
 import com.sharafindustries.status.model.User;
@@ -20,10 +27,17 @@ public class UserService
 {
 	@Autowired
 	private ApplicationContext context;
+	
 	@Autowired
 	private UserRepository userRepository;
+	
 	@Autowired
 	private StatusService statusService;
+	
+	@Autowired
+	private GoogleIdTokenVerifier googleIdTokenVerifier;
+	
+	private static final Logger logger = LoggerFactory.getLogger(UserService.class);
 	
 	/**
 	 * Creates and saves a new user.
@@ -40,6 +54,29 @@ public class UserService
 			throw new ResponseStatusException(HttpStatus.CONFLICT, "A user with that email is already registered");
 		User newUser = context.getBean(User.class, email, password);
 		return userRepository.save(newUser);
+	}
+	
+	public boolean verifyGoogleToken(String tokenString) 
+	{
+		logger.info("token received: {}", tokenString);
+		GoogleIdToken token;
+		try
+		{
+			token = googleIdTokenVerifier.verify(tokenString);
+			return true;
+		}
+		catch (GeneralSecurityException e)
+		{
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			return false;
+		}
+		catch (IOException e)
+		{
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			return false;
+		}
 	}
 	
 	/**

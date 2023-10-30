@@ -1,6 +1,10 @@
 package com.sharafindustries.status.controller;
 
+import java.io.IOException;
 import java.util.List;
+import java.util.stream.Collectors;
+
+import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -8,6 +12,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -29,6 +34,20 @@ public class StatusController
 	
 	private static final Logger logger = LoggerFactory.getLogger(StatusController.class);
 
+	
+	@PostMapping("/google-token-test")
+	public ResponseEntity<String> testGoogleToken(HttpServletRequest request, @RequestBody String token) throws IOException
+	{
+		logger.info("query string is {}", request.getQueryString());
+		logger.info("headers are {}", request.getHeaderNames());
+//		logger.info("request body is {}", request.getReader().lines().collect(Collectors.toList()));
+		logger.info("received token is {}", token);
+//		boolean success = userService.verifyGoogleToken(token);
+//		if (success)
+			return ResponseEntity.ok().build();
+//		else
+//			return ResponseEntity.badRequest().build();
+	}
 	
 	@PostMapping("/authenticate-user")
 	public ResponseEntity<String> areCredentialsValid(@RequestHeader("Authorization") String authorizationHeader)
