@@ -42,13 +42,13 @@ public class StatusControllerTest
     {
     	if (!isInitialized)
     	{
-	    	User user = userService.createAndSaveNewUser(defaultEmail, password);
+	    	User user = userService.createAndSaveNewUser(defaultEmail);
 	    	userService.addFriend(user, friendToDeleteEmail);
 	    	
-	    	User friendUser = userService.createAndSaveNewUser(friendEmail, password);
+	    	User friendUser = userService.createAndSaveNewUser(friendEmail);
 	    	userService.addFriend(friendUser, defaultEmail);
 	    	
-	    	userService.createAndSaveNewUser(duplicateEmail, password);
+	    	userService.createAndSaveNewUser(duplicateEmail);
 	    	isInitialized = true;
     	}
     	String base64EncodedCredentials = Base64.getEncoder().encodeToString("email@example.com:password".getBytes());

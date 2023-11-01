@@ -1,5 +1,6 @@
 package com.sharafindustries.status.model;
 
+import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -21,8 +22,6 @@ public class User
 	@Id
 	private String email;
 	
-	private String password;
-	
 	@ElementCollection
 	private List<String> friendList;
 	
@@ -36,6 +35,8 @@ public class User
 	
 	private String currentMessage;
 	
+	private String passphrase;
+	
 	public User()
 	{
 		friendList = new ArrayList<String>();
@@ -43,17 +44,18 @@ public class User
 		this.currentStatusName = Status.DEFAULT_AVAILABLE_STATUS.getName();
 		this.currentAvailability = Status.DEFAULT_AVAILABLE_STATUS.getAvailability();
 		this.currentMessage = Status.DEFAULT_AVAILABLE_STATUS.getMessage();
+		this.passphrase = generatePassphrase();
 	}
 	
-	public User(String email, String password)
+	public User(String email)
 	{
 		this.email = email;
-		this.password = password;
 		friendList = new ArrayList<String>();
 		customStatuses = new ArrayList<Status>();
 		this.currentStatusName = Status.DEFAULT_AVAILABLE_STATUS.getName();
 		this.currentAvailability = Status.DEFAULT_AVAILABLE_STATUS.getAvailability();
 		this.currentMessage = Status.DEFAULT_AVAILABLE_STATUS.getMessage();
+		this.passphrase = generatePassphrase();
 	}
 
 	public User(String email, List<String> friendList, List<Status> customStatuses, String currentStatusName, Availability currentAvailability, String currentMessage)
@@ -64,6 +66,7 @@ public class User
 		this.currentStatusName = currentStatusName;
 		this.currentAvailability = currentAvailability;
 		this.currentMessage = currentMessage;
+		this.passphrase = generatePassphrase();
 	}
 
 	public String getEmail()
@@ -74,16 +77,6 @@ public class User
 	public void setEmail(String email)
 	{
 		this.email = email;
-	}
-	
-	public String getPassword()
-	{
-		return password;
-	}
-
-	public void setPassword(String password)
-	{
-		this.password = password;
 	}
 
 	public List<String> getFriendList()
@@ -135,6 +128,31 @@ public class User
 	{
 		this.currentMessage = currentMessage;
 	}
+	
+	public String getPassphrase()
+	{
+		return passphrase;
+	}
+
+	public void setPassphrase(String passphrase)
+	{
+		this.passphrase = passphrase;
+	}
+
+	private String generatePassphrase()
+	{
+		int leftLimit = 48; // numeral '0'
+	    int rightLimit = 122; // letter 'z'
+	    int passphraseLength = 10;
+	    SecureRandom random = new SecureRandom();
+
+	    String passphrase = random.ints(leftLimit, rightLimit + 1)
+	      .filter(i -> (i <= 57 || i >= 65) && (i <= 90 || i >= 97))
+	      .limit(passphraseLength)
+	      .collect(StringBuilder::new, StringBuilder::appendCodePoint, StringBuilder::append)
+	      .toString();
+	    return passphrase;
+	}
 
 	@Override
 	public int hashCode()
@@ -147,7 +165,7 @@ public class User
 		result = prime * result + ((customStatuses == null) ? 0 : customStatuses.hashCode());
 		result = prime * result + ((email == null) ? 0 : email.hashCode());
 		result = prime * result + ((friendList == null) ? 0 : friendList.hashCode());
-		result = prime * result + ((password == null) ? 0 : password.hashCode());
+		result = prime * result + ((passphrase == null) ? 0 : passphrase.hashCode());
 		return result;
 	}
 
@@ -198,12 +216,12 @@ public class User
 		}
 		else if (!friendList.equals(other.friendList))
 			return false;
-		if (password == null)
+		if (passphrase == null)
 		{
-			if (other.password != null)
+			if (other.passphrase != null)
 				return false;
 		}
-		else if (!password.equals(other.password))
+		else if (!passphrase.equals(other.passphrase))
 			return false;
 		return true;
 	}
@@ -211,9 +229,9 @@ public class User
 	@Override
 	public String toString()
 	{
-		return "User [email=" + email + ", password=" + password + ", friendList=" + friendList + ", customStatuses="
-				+ customStatuses + ", currentStatusName=" + currentStatusName + ", currentAvailability="
-				+ currentAvailability + ", currentMessage=" + currentMessage + "]";
+		return "User [email=" + email + ", friendList=" + friendList + ", customStatuses=" + customStatuses
+				+ ", currentStatusName=" + currentStatusName + ", currentAvailability=" + currentAvailability
+				+ ", currentMessage=" + currentMessage + ", passphrase=" + passphrase + "]";
 	}
 	
 }

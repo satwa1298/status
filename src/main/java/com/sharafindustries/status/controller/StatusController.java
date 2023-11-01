@@ -1,15 +1,13 @@
 package com.sharafindustries.status.controller;
 
-import java.io.IOException;
 import java.util.List;
-import java.util.stream.Collectors;
+import java.util.Map;
 
-import javax.servlet.http.HttpServletRequest;
-
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -17,43 +15,38 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 
 import com.sharafindustries.status.model.User;
 import com.sharafindustries.status.model.UserStatusInfo;
 import com.sharafindustries.status.service.UserService;
 
-@CrossOrigin(origins = "http://localhost:9090")
 @RestController
 public class StatusController
 {
+	//TODO handle returning errors better. instead of throwing exceptions return status codes
+	//TODO have a filter on all incoming requests to authenticate user
+	//TODO error handling for if required attributes are missing from request body
+	
 	@Autowired
 	private UserService userService;
 	
 	private static final Logger logger = LoggerFactory.getLogger(StatusController.class);
 
 	
-	@PostMapping("/google-token-test")
-	public ResponseEntity<String> testGoogleToken(HttpServletRequest request, @RequestBody String token) throws IOException
+	@GetMapping("/does-account-exist")
+	public boolean doesAccountExist(@RequestHeader("Authorization") String authorizationHeader)
 	{
-		logger.info("query string is {}", request.getQueryString());
-		logger.info("headers are {}", request.getHeaderNames());
-//		logger.info("request body is {}", request.getReader().lines().collect(Collectors.toList()));
-		logger.info("received token is {}", token);
-//		boolean success = userService.verifyGoogleToken(token);
-//		if (success)
-			return ResponseEntity.ok().build();
-//		else
-//			return ResponseEntity.badRequest().build();
-	}
-	
-	@PostMapping("/authenticate-user")
-	public ResponseEntity<String> areCredentialsValid(@RequestHeader("Authorization") String authorizationHeader)
-	{
-		userService.authenticateUser(authorizationHeader);
-		return ResponseEntity.ok().build();
+		try
+		{
+			userService.authenticateUser(authorizationHeader);
+			return true;
+		}
+		catch (ResponseStatusException e)
+		{
+			if (e.getStatus() == HttpStatus.BAD_REQUEST) //token is invalid
+				throw e;
+			return false;
+		}
 	}
 	
 	@GetMapping("/get-status")
@@ -71,35 +64,32 @@ public class StatusController
 	}
 	
 	@PostMapping("/create-custom-status")
-	public ResponseEntity<Void> addCustomStatus(@RequestHeader("Authorization") String authorizationHeader, 
-			@RequestParam(value = "statusName") String statusName, 
-			@RequestParam(value = "availability") String availability, 
-			@RequestParam(value = "message") String message)
+	public ResponseEntity<Void> addCustomStatus(@RequestHeader("Authorization") String authorizationHeader, @RequestBody Map<String, String> body)
 	{
 		logger.info("received /create-custom-status POST request");
 		User user = userService.authenticateUser(authorizationHeader);
 		logger.info("user: {}", user.getEmail());
-		userService.addCustomStatus(user, statusName, availability, message);
+		userService.addCustomStatus(user, body.get("statusName"), body.get("availability"), body.get("message"));
 		return new ResponseEntity<>(HttpStatus.CREATED);
 	}
 	
 	@PostMapping("/add-friend")
-	public ResponseEntity<String> addFriend(@RequestHeader("Authorization") String authorizationHeader, @RequestParam(value = "emailToAdd") String friendEmailToAdd)
+	public ResponseEntity<String> addFriend(@RequestHeader("Authorization") String authorizationHeader, @RequestBody Map<String, String> body)
 	{
 		logger.info("received /add-friend POST request");
 		User user = userService.authenticateUser(authorizationHeader);
 		logger.info("user: {}", user.getEmail());
-		userService.addFriend(user, friendEmailToAdd);
+		userService.addFriend(user, body.get("emailToAdd"));
 		return ResponseEntity.ok().build();
 	}
 	
 	@PostMapping("/delete-friend")
-	public ResponseEntity<String> deleteFriend(@RequestHeader("Authorization") String authorizationHeader, @RequestParam(value = "emailToDelete") String friendEmailToDelete)
+	public ResponseEntity<String> deleteFriend(@RequestHeader("Authorization") String authorizationHeader, @RequestBody Map<String, String> body)
 	{
 		logger.info("received /delete-friend POST request");
 		User user = userService.authenticateUser(authorizationHeader);
 		logger.info("user: {}", user.getEmail());
-		userService.deleteFriend(user, friendEmailToDelete);
+		userService.deleteFriend(user, body.get("emailToDelete"));
 		return ResponseEntity.ok().build();
 	}
 	
@@ -122,31 +112,44 @@ public class StatusController
 	}
 	
 	@PostMapping("/set-status")
-	public String setCurrentStatus(@RequestHeader("Authorization") String authorizationHeader, @RequestParam String statusName)
+	public String setCurrentStatus(@RequestHeader("Authorization") String authorizationHeader, @RequestBody Map<String, String> body)
 	{
 		logger.info("received /set-status POST request");
 		User user = userService.authenticateUser(authorizationHeader);
 		logger.info("user: {}", user.getEmail());
-		userService.setCurrentStatus(user, statusName);
+		userService.setCurrentStatus(user, body.get("statusName"));
 		return "status set";
 	}
 	
 	@PostMapping("/create-user")
-	public ResponseEntity<String> createUser(@RequestParam(value = "email") String userEmail, @RequestParam String password)
+	public ResponseEntity<String> createUser(@RequestHeader("Authorization") String authorizationHeader)
 	{
-		logger.info("received /create-user POST request for email {}", userEmail);
-		userService.createAndSaveNewUser(userEmail, password);
+		userService.createAndSaveNewUser(authorizationHeader);
 		return new ResponseEntity<>(HttpStatus.CREATED);
 	}
 	
 	@PostMapping("/delete-custom-status")
-	public ResponseEntity<String> deleteCustomStatus(@RequestHeader("Authorization") String authorizationHeader, @RequestParam String statusName)
+	public ResponseEntity<String> deleteCustomStatus(@RequestHeader("Authorization") String authorizationHeader, @RequestBody Map<String, String> body)
 	{
 		logger.info("received /delete-custom-status POST request");
 		User user = userService.authenticateUser(authorizationHeader);
 		logger.info("user: {}", user.getEmail());
-		userService.deleteCustomStatus(user, statusName);
+		userService.deleteCustomStatus(user, body.get("statusName"));
 		return ResponseEntity.ok().build();
+	}
+	
+	@GetMapping("/get-passphrase")
+	public String getPassphrase(@RequestHeader("Authorization") String authorizationHeader)
+	{
+		User user = userService.authenticateUser(authorizationHeader);
+		logger.info("passphrase is {}", user.getPassphrase());
+		return user.getPassphrase();
+	}
+	
+	@GetMapping("/brew-coffee")
+	public ResponseEntity<String> brewCoffee()
+	{
+		return new ResponseEntity<>(HttpStatus.I_AM_A_TEAPOT);
 	}
 
 }

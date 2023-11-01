@@ -2,7 +2,6 @@ package com.sharafindustries.status.service;
 
 import java.io.IOException;
 import java.security.GeneralSecurityException;
-import java.util.Base64;
 import java.util.List;
 
 import org.slf4j.Logger;
@@ -14,8 +13,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
 import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken;
+import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken.Payload;
 import com.google.api.client.googleapis.auth.oauth2.GoogleIdTokenVerifier;
-import com.sharafindustries.status.controller.StatusController;
 import com.sharafindustries.status.model.Availability;
 import com.sharafindustries.status.model.Status;
 import com.sharafindustries.status.model.User;
@@ -25,6 +24,9 @@ import com.sharafindustries.status.repository.UserRepository;
 @Service
 public class UserService
 {
+	//TODO implement passphrase refresh
+	//TODO implement status editing
+	
 	@Autowired
 	private ApplicationContext context;
 	
@@ -42,40 +44,53 @@ public class UserService
 	/**
 	 * Creates and saves a new user.
 	 * 
-	 * @param email the email address of the user
-	 * @param password the password of the user
+	 * @param authorizationHeader the authentication header string containing the user's id token 
 	 * @return the newly created {@link User}
 	 * @throws ResponseStatusException with HttpStatus.CONFLICT if a user with that email already exists
+	 * @throws ResponseStatusException with HttpStatus.BAD_REQUEST if token verification fails
 	 */
-	public User createAndSaveNewUser(String email, String password)
+	public User createAndSaveNewUser(String authorizationHeader)
 	{
+		Payload userInfo = verifyGoogleToken(authorizationHeader); 
+		String email = userInfo.getEmail();
 		User existingUser = userRepository.findByEmail(email);
 		if (existingUser != null)
 			throw new ResponseStatusException(HttpStatus.CONFLICT, "A user with that email is already registered");
-		User newUser = context.getBean(User.class, email, password);
+		User newUser = context.getBean(User.class, email);
 		return userRepository.save(newUser);
 	}
 	
-	public boolean verifyGoogleToken(String tokenString) 
+	
+	/**
+	 * Verifies the given token in the authorization header.
+	 * 
+	 * @param authorizationHeader the authorization header containing the token
+	 * @return the payload containing user info
+	 * @throws ResponseStatusException with HttpStatus.BAD_REQUEST if token verification fails
+	 */
+	private Payload verifyGoogleToken(String authorizationHeader) 
 	{
+		String tokenString = authorizationHeader.substring("Bearer ".length());
 		logger.info("token received: {}", tokenString);
 		GoogleIdToken token;
 		try
 		{
 			token = googleIdTokenVerifier.verify(tokenString);
-			return true;
+			if (token == null)
+				throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid credential");
+			return token.getPayload();
 		}
 		catch (GeneralSecurityException e)
 		{
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-			return false;
+			return null;
 		}
 		catch (IOException e)
 		{
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-			return false;
+			return null;
 		}
 	}
 	
@@ -91,29 +106,43 @@ public class UserService
 	}
 	
 	/**
-	 * Authenticates a user using BasicAuth. If successful the user is returned. If not, an exception is thrown. Used to authenticate any requests made to the API.
+	 * Authenticates a user using their Google OAuth token. If successful the user is returned. If not, an exception is thrown. Used to authenticate any requests made to the API.
 	 * 
-	 * @param authorizationHeader the BasicAuth header
+	 * @param authorizationHeader the authorization header containing the token
 	 * @return the authenticated User
 	 * @throws ResponseStatusException with HttpStatus.UNAUTHORIZED if the header is invalid or if authentication is not successful
+	 * @throws ResponseStatusException with HttpStatus.BAD_REQUEST if token verification fails
 	 */
 	public User authenticateUser(String authorizationHeader)
 	{
-		if (authorizationHeader == null || !authorizationHeader.startsWith("Basic"))
-		{
+		if (authorizationHeader == null)
 			throw new ResponseStatusException(HttpStatus.UNAUTHORIZED);
-		}
-		String base64Credentials = authorizationHeader.substring("Basic ".length());
-		String decodedCredentials = new String(Base64.getDecoder().decode(base64Credentials));
-		String[] values = decodedCredentials.split(":");
-		String email = values[0];
-		String password = values[1];
-		
+		if (authorizationHeader.startsWith("Passphrase "))
+			return authenticateWithPassphrase(authorizationHeader);
+		if (!authorizationHeader.startsWith("Bearer "))
+			throw new ResponseStatusException(HttpStatus.UNAUTHORIZED);
+		Payload userInfo = verifyGoogleToken(authorizationHeader);
+		String email = userInfo.getEmail();
 		User user = userRepository.findByEmail(email);
-		if (user == null || !user.getPassword().equals(password))
+		if (user == null)
 		{
 			throw new ResponseStatusException(HttpStatus.UNAUTHORIZED);
 		}
+		return user;
+	}
+	
+	/**
+	 * Authenticates a user using their passphrase. Used for when requests are made from a widget. 
+	 * 
+	 * @param authorizationHeader the authorization header containing the passphrase
+	 * @return the authenticated user
+	 */
+	private User authenticateWithPassphrase(String authorizationHeader)
+	{
+		String passphrase = authorizationHeader.substring("Passphrase ".length());
+		User user = userRepository.findByPassphrase(passphrase);
+		if (user == null)
+			throw new ResponseStatusException(HttpStatus.UNAUTHORIZED);
 		return user;
 	}
 	
@@ -125,7 +154,8 @@ public class UserService
 	 */
 	public void addFriend(User user, String friendEmailToAdd)
 	{
-		List<String> friendList = user.getFriendList();;
+		//TODO also check is user is signed up
+		List<String> friendList = user.getFriendList();
 		if (!friendList.contains(friendEmailToAdd))
 		{
 			friendList.add(friendEmailToAdd);
@@ -164,7 +194,7 @@ public class UserService
 	 * Checks whether the requesting user is on the friend list of another user in order to authorize viewing the status of the other user. 
 	 * 
 	 * @param requestingUser the user requesting to see another's status
-	 * @param maybeFriendEmail the email of the one who's status is being requested
+	 * @param maybeFriendEmail the email of the one whose status is being requested
 	 * @return true if the requesting user is on the other's friend list, false otherwise
 	 * @throws ResponseStatusException with HttpStatus.BAD_REQUEST if the email whose status is requested is not registered
 	 */

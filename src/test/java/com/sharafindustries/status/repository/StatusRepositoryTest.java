@@ -26,13 +26,13 @@ public class StatusRepositoryTest
 	public void testFindStatusByName()
 	{
 		String showeringMessage = "I'm showering right now";
-		User user1 = new User("tester1@test.com", "password");
+		User user1 = new User("tester1@test.com");
 		List<Status> customStatuses1 = new ArrayList<>();
 		customStatuses1.add(new Status(user1, "showering", Availability.Away, showeringMessage));
 		user1.setCustomStatuses(customStatuses1);
 		userRepository.save(user1);
 		
-		User user2 = new User("tester2@test.com", "password");
+		User user2 = new User("tester2@test.com");
 		List<Status> customStatuses2 = new ArrayList<>();
 		customStatuses2.add(new Status(user2, "showering", Availability.Away, "I shouldn't show up"));
 		user2.setCustomStatuses(customStatuses2);

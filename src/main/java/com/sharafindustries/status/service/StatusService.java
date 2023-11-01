@@ -75,7 +75,7 @@ public class StatusService
 		}
 		Status status = statusRepository.getStatusByNameAndUser(name, user);
 		if (status == null)
-			throw new ResponseStatusException(HttpStatus.NOT_FOUND, "no status with that name was found");
+			throw new ResponseStatusException(HttpStatus.NOT_FOUND, "no status with name " + name + " was found");
 		return status;
 		
 	}

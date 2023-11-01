@@ -52,28 +52,28 @@ public class UserServiceTest
 	@Test
     public void testCreateAndSaveNewUser_CreatesAndSavesNewUser() 
 	{
-		User testUser = new User("email", "password");
+		User testUser = new User("email");
         when(userRepository.findByEmail("email")).thenReturn(null);
         when(context.getBean(User.class, "email", "password")).thenReturn(testUser);
         when(userRepository.save(any(User.class))).thenReturn(testUser);
-        User user = userService.createAndSaveNewUser("email", "password");
+        User user = userService.createAndSaveNewUser("email");
         assertEquals("email", user.getEmail());
     }
 
 	@Test
     public void testCreateAndSaveNewUser_ThrowsExceptionWhen_RegistrationIsAttemptedWithExistingEmailAddress() 
 	{
-        when(userRepository.findByEmail("email")).thenReturn(new User("email", "password"));
+        when(userRepository.findByEmail("email")).thenReturn(new User("email"));
         assertThrows(ResponseStatusException.class, () -> 
         {
-            userService.createAndSaveNewUser("email", "password");
+            userService.createAndSaveNewUser("email");
         });
     }
 
 	@Test
     public void testGetUserByEmail_ReturnsCorrectUser() 
 	{
-        when(userRepository.findByEmail("email")).thenReturn(new User("email", "password"));
+        when(userRepository.findByEmail("email")).thenReturn(new User("email"));
         User user = userService.getUserByEmail("email");
         assertEquals("email", user.getEmail());
     }
@@ -89,7 +89,7 @@ public class UserServiceTest
 	public void testAuthenticateUser_SuccessfullyReturnsCorrectUser()
 	{
 		String header = "Basic " + Base64.getEncoder().encodeToString("email:password".getBytes());
-		when(userRepository.findByEmail("email")).thenReturn(new User("email", "password"));
+		when(userRepository.findByEmail("email")).thenReturn(new User("email"));
 		User user = userService.authenticateUser(header);
 		assertEquals("email", user.getEmail());
 	}
@@ -107,7 +107,7 @@ public class UserServiceTest
     public void testAuthenticateUser_ThrowsException_WhenPasswordIsIncorrect() 
     {
         String header = "Basic " + Base64.getEncoder().encodeToString("email:wrongpassword".getBytes());
-        when(userRepository.findByEmail("email")).thenReturn(new User("email", "password"));
+        when(userRepository.findByEmail("email")).thenReturn(new User("email"));
         assertThrows(ResponseStatusException.class, () -> 
         {
             userService.authenticateUser(header);
@@ -117,7 +117,7 @@ public class UserServiceTest
 	@Test
 	public void testAddFriend_SuccessfullyAddsEmailToFriendList()
 	{
-		User user = new User("email", "password");
+		User user = new User("email");
 		user.setFriendList(new ArrayList<>());
 		userService.addFriend(user, "friendEmail");
 		assertTrue(user.getFriendList().contains("friendEmail"));
@@ -126,7 +126,7 @@ public class UserServiceTest
 	@Test
 	public void testAddFriend_DoesNotAddSameEmailAddressToFriendLiist_IfDuplicateEmailIsAdded()
 	{
-	    User user = new User("email", "password");
+	    User user = new User("email");
 	    user.setFriendList(new ArrayList<>(Arrays.asList("friendEmail1")));
 	    when(userRepository.findByEmail("email")).thenReturn(user);
 	    userService.addFriend(user, "friendEmail1"); // Try adding the same friend email again
@@ -140,7 +140,7 @@ public class UserServiceTest
 	@Test
 	public void testDeleteFriend_RemovesEMailFromFriendList()
 	{
-		User user = new User("email", "password");
+		User user = new User("email");
 		user.setFriendList(new ArrayList<>(Arrays.asList("friendEmail")));
 		userService.deleteFriend(user, "friendEmail");
 		assertFalse(user.getFriendList().contains("friendEmail"));
@@ -149,7 +149,7 @@ public class UserServiceTest
 	@Test
 	public void testAddCustomStatus_AddsCustomStatus()
 	{
-		User user = new User("email", "password");
+		User user = new User("email");
 		user.setCustomStatuses(new ArrayList<>());
 		Status customStatus = new Status(user, "statusName", Availability.Away, "message");
 		when(statusService.createCustomStatus(user, "statusName", "Away", "message")).thenReturn(customStatus);
@@ -160,7 +160,7 @@ public class UserServiceTest
 	@Test
 	public void testAddCustomStatus_ThrowsException_WhenInvalidAvailabilityIsGiven()
 	{
-		User user = new User("email", "password");
+		User user = new User("email");
 		when(statusService.createCustomStatus(user, "statusName", "invalidAvailability", "message"))
 				.thenThrow(new ResponseStatusException(HttpStatus.BAD_REQUEST, "invalidAvailability is not a valid Availability"));
 		assertThrows(ResponseStatusException.class, () ->
@@ -172,8 +172,8 @@ public class UserServiceTest
 	@Test
 	public void testCanUserViewStatus_ReturnsTrue_WhenEmailIsOnFriendList()
 	{
-		User user = new User("email", "password");
-		User friendUser = new User("friendEmail", "password");
+		User user = new User("email");
+		User friendUser = new User("friendEmail");
 		friendUser.setFriendList(new ArrayList<>(Arrays.asList("email")));
 		when(userRepository.findByEmail("friendEmail")).thenReturn(friendUser);
 		assertTrue(userService.canUserViewStatus(user, "friendEmail"));
@@ -182,8 +182,8 @@ public class UserServiceTest
 	@Test
 	public void testCanUserViewStatus_ReturnsFalse_WhenEmailIsNotOnFriendList()
 	{
-		User user = new User("email", "password");
-		User friendUser = new User("friendEmail", "password");
+		User user = new User("email");
+		User friendUser = new User("friendEmail");
 		friendUser.setFriendList(new ArrayList<>());
 		when(userRepository.findByEmail("friendEmail")).thenReturn(friendUser);
 		assertFalse(userService.canUserViewStatus(user, "friendEmail"));
@@ -192,7 +192,7 @@ public class UserServiceTest
 	@Test
 	public void testCanUserViewStatus_ThrowsException_WhenFriendEmailIsNotRegistered()
 	{
-		User user = new User("email", "password");
+		User user = new User("email");
 		when(userRepository.findByEmail("nonexistentfriend")).thenReturn(null);
 		assertThrows(ResponseStatusException.class, () ->
 		{

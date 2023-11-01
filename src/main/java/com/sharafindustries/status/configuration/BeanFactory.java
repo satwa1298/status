@@ -21,9 +21,9 @@ public class BeanFactory
 	
 	@Bean
 	@Scope("prototype")
-	public User createUser(String email, String password)
+	public User createUser(String email)
 	{
-		User user = new User(email, password);
+		User user = new User(email);
 		return user;
 	}
 	
